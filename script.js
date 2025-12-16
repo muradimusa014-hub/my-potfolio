@@ -147,16 +147,18 @@
     }
   }
 
+  // pause canvas updates while scrolling to avoid jank
+  let isScrolling = false;
+  let scrollTimer = null;
+
   function animate() {
-    // reduce activity during scrolling to improve scroll smoothness
-    frameCount++;
-    const now = Date.now();
-    const scrolling = now - lastScrollTime < 160;
-    const skip = scrolling ? 3 : 0; // draw less frequently while scrolling
-    if (frameCount % (skip + 1) === 0) {
-      update();
-      draw();
+    if (isScrolling) {
+      // skip updates while user is actively scrolling
+      requestAnimationFrame(animate);
+      return;
     }
+    update();
+    draw();
     requestAnimationFrame(animate);
   }
 
@@ -165,13 +167,12 @@
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseout', onLeave);
   window.addEventListener('mouseleave', onLeave);
-  // reduce animation frequency while user is scrolling
-  let lastScrollTime = 0;
-  window.addEventListener('scroll', () => {
-    lastScrollTime = Date.now();
-  }, { passive: true });
 
-  let frameCount = 0;
+  window.addEventListener('scroll', () => {
+    isScrolling = true;
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { isScrolling = false; }, 180);
+  }, { passive: true });
 
   // start
   resize();

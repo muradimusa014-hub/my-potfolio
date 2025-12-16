@@ -22,6 +22,9 @@ body {
   line-height: 1.6;
 }
 
+/* smoother anchor navigation */
+html { scroll-behavior: smooth; }
+
 h1,
 h2 {
   font-family: 'Poppins', sans-serif;
@@ -105,15 +108,9 @@ section {
   }
 }
 
-/* Top-right menu: show links by default (large screens) */
+/* Mobile menu: hidden by default, shown only on small screens */
 .mobile-menu {
-  display: flex;
-  gap: 10px;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 6;
-  align-items: center;
+  display: none;
 }
 
 .mobile-drawer {
@@ -122,7 +119,7 @@ section {
 }
 
 .mobile-toggle {
-  display: none; /* visible only on small screens */
+  display: none;
   background: transparent;
   border: none;
   color: var(--accent-contrast);
@@ -154,7 +151,15 @@ section {
 }
 
 @media (max-width: 768px) {
-  /* switch to hamburger for small screens */
+  .mobile-menu {
+    display: flex;
+    gap: 10px;
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 6;
+    align-items: center;
+  }
   .mobile-toggle {
     display: inline-flex;
   }
