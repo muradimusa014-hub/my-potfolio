@@ -38,8 +38,8 @@
           y,
           ox: x,
           oy: y,
-          vx: (Math.random() - 0.5) * 0.08, // slower initial speed
-          vy: (Math.random() - 0.5) * 0.08,
+          vx: (Math.random() - 0.5) * 0.04, // slower initial speed (halved)
+          vy: (Math.random() - 0.5) * 0.04,
           col: i,
           row: j
         });
@@ -69,12 +69,12 @@
       p.y += p.vy;
 
       // return toward origin (weaker)
-      p.vx += (p.ox - p.x) * 0.0002;
-      p.vy += (p.oy - p.y) * 0.0002;
+      p.vx += (p.ox - p.x) * 0.00012;
+      p.vy += (p.oy - p.y) * 0.00012;
 
       // small random jitter (weaker)
-      p.vx += (Math.random() - 0.5) * 0.0002;
-      p.vy += (Math.random() - 0.5) * 0.0002;
+      p.vx += (Math.random() - 0.5) * 0.00008;
+      p.vy += (Math.random() - 0.5) * 0.00008;
 
       // mouse repel (gentler)
       if (mouse.x !== null) {
@@ -83,8 +83,8 @@
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         if (dist < maxDist) {
           const force = (maxDist - dist) / maxDist * 0.6;
-          p.x += (dx / dist) * force * 1.5; // reduced multiplier
-          p.y += (dy / dist) * force * 1.5;
+          p.x += (dx / dist) * force * 0.9; // reduced multiplier
+          p.y += (dy / dist) * force * 0.9;
         }
       }
     }
@@ -97,11 +97,13 @@
     for (let k = 0; k < points.length; k++) {
       const p = points[k];
 
-      // draw a small subtle dot
-      ctx.fillStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},0.12)`;
+      // draw a small subtle dot (more visible)
+      ctx.save();
+      ctx.fillStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},0.22)`;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, 0.6, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, 0.5, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
 
       // connect to right, bottom, bottom-right and bottom-left neighbors to make diamond shapes
       const i = p.col;
@@ -121,12 +123,17 @@
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < maxDist) {
           const alpha = 1 - dist / maxDist;
-          ctx.strokeStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},${alpha * 0.18})`;
-          ctx.lineWidth = 0.45; // very thin lines
+          ctx.save();
+          ctx.strokeStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},${alpha * 0.32})`;
+          ctx.lineWidth = 0.3; // very thin lines
+          // soft glow
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = `rgba(${webColor.r},${webColor.g},${webColor.b},0.06)`;
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(q.x, q.y);
           ctx.stroke();
+          ctx.restore();
         }
       }
     }
@@ -141,8 +148,15 @@
   }
 
   function animate() {
-    update();
-    draw();
+    // reduce activity during scrolling to improve scroll smoothness
+    frameCount++;
+    const now = Date.now();
+    const scrolling = now - lastScrollTime < 160;
+    const skip = scrolling ? 3 : 0; // draw less frequently while scrolling
+    if (frameCount % (skip + 1) === 0) {
+      update();
+      draw();
+    }
     requestAnimationFrame(animate);
   }
 
@@ -151,8 +165,38 @@
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseout', onLeave);
   window.addEventListener('mouseleave', onLeave);
+  // reduce animation frequency while user is scrolling
+  let lastScrollTime = 0;
+  window.addEventListener('scroll', () => {
+    lastScrollTime = Date.now();
+  }, { passive: true });
+
+  let frameCount = 0;
 
   // start
   resize();
   animate();
+  
+  // Mobile menu toggle (hamburger)
+  try {
+    const menu = document.querySelector('.mobile-menu');
+    const toggle = document.querySelector('.mobile-toggle');
+    const drawer = document.querySelector('.mobile-drawer');
+    if (menu && toggle && drawer) {
+      toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+      });
+      drawer.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          menu.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          drawer.setAttribute('aria-hidden', 'true');
+        });
+      });
+    }
+  } catch (e) {
+    // ignore if DOM not ready or missing elements
+  }
 })();

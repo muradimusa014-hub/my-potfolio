@@ -35,7 +35,7 @@ a {
 }
 
 section {
-  padding: 80px 10%;
+  padding: 30px 10%;
 }
 
 /* =========================
@@ -74,9 +74,9 @@ section {
 ========================= */
 
 .hero {
-  min-height: 100vh;
+  min-height: 80vh;
   background: linear-gradient(#0f0f0f);
-  padding-bottom: 60px;
+  padding-bottom: 20px;
   position: relative;
 }
 
@@ -103,6 +103,96 @@ section {
     font-size: 1.6rem;
     line-height: 1.15;
   }
+}
+
+/* Top-right menu: show links by default (large screens) */
+.mobile-menu {
+  display: flex;
+  gap: 10px;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  align-items: center;
+}
+
+.mobile-drawer {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-toggle {
+  display: none; /* visible only on small screens */
+  background: transparent;
+  border: none;
+  color: var(--accent-contrast);
+  font-size: 1.15rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mobile-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95rem;
+  transition: background-color 0.18s ease, transform 0.12s ease;
+}
+
+.mobile-link:hover,
+.mobile-link:active {
+  transform: translateY(-2px);
+  background-color: var(--hover-bg-accent);
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  /* switch to hamburger for small screens */
+  .mobile-toggle {
+    display: inline-flex;
+  }
+  .mobile-drawer {
+    display: none; /* hidden until toggled */
+    flex-direction: column;
+    gap: 8px;
+    position: fixed;
+    top: 54px;
+    right: 14px;
+    background: rgba(18,18,18,0.9);
+    backdrop-filter: blur(6px);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .mobile-menu.open .mobile-drawer {
+    display: flex;
+  }
+
+  /* hide desktop nav links on small screens */
+  .nav-links {
+    display: none;
+  }
+
+  section {
+    padding: 20px 6%;
+  }
+
+  .hero {
+    min-height: 72vh;
+    padding-bottom: 16px;
+  }
+}
+
+/* Scrolling improvements for mobile iOS smoothness */
+html, body {
+  -webkit-overflow-scrolling: touch;
 }
 
 .hero p {
@@ -228,6 +318,8 @@ a:focus-visible {
   height: 100vh;
   z-index: 2; /* sits above page backgrounds but below text */
   pointer-events: none;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* make sure hero content and UI sit above the canvas */
