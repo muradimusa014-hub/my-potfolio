@@ -14,8 +14,8 @@
   const maxDist = 180; // max distance to draw a connecting line
   const mouse = { x: null, y: null };
 
-  // color for the web: light blue by default (you can change to green)
-  const webColor = { r: 120, g: 200, b: 255 };
+  // color for the web: brighter light blue for more visible shining effect
+  const webColor = { r: 90, g: 190, b: 255 };
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -38,8 +38,8 @@
           y,
           ox: x,
           oy: y,
-          vx: (Math.random() - 0.5) * 0.04, // slower initial speed (halved)
-          vy: (Math.random() - 0.5) * 0.04,
+          vx: (Math.random() - 0.5) * 0.06, // slightly faster initial speed
+          vy: (Math.random() - 0.5) * 0.06,
           col: i,
           row: j
         });
@@ -68,23 +68,23 @@
       p.x += p.vx;
       p.y += p.vy;
 
-      // return toward origin (weaker)
-      p.vx += (p.ox - p.x) * 0.00012;
-      p.vy += (p.oy - p.y) * 0.00012;
+      // return toward origin (slightly stronger to nudge movement)
+      p.vx += (p.ox - p.x) * 0.00018;
+      p.vy += (p.oy - p.y) * 0.00018;
 
-      // small random jitter (weaker)
-      p.vx += (Math.random() - 0.5) * 0.00008;
-      p.vy += (Math.random() - 0.5) * 0.00008;
+      // small random jitter (slightly increased so movement is more lively)
+      p.vx += (Math.random() - 0.5) * 0.00012;
+      p.vy += (Math.random() - 0.5) * 0.00012;
 
-      // mouse repel (gentler)
+      // mouse repel (gentle push)
       if (mouse.x !== null) {
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         if (dist < maxDist) {
-          const force = (maxDist - dist) / maxDist * 0.6;
-          p.x += (dx / dist) * force * 0.9; // reduced multiplier
-          p.y += (dy / dist) * force * 0.9;
+          const force = (maxDist - dist) / maxDist * 0.7;
+          p.x += (dx / dist) * force * 1.2;
+          p.y += (dy / dist) * force * 1.2;
         }
       }
     }
@@ -124,11 +124,12 @@
         if (dist < maxDist) {
           const alpha = 1 - dist / maxDist;
           ctx.save();
-          ctx.strokeStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},${alpha * 0.32})`;
-          ctx.lineWidth = 0.3; // very thin lines
+          // stronger alpha and slightly thicker for a visible shining blue
+          ctx.strokeStyle = `rgba(${webColor.r},${webColor.g},${webColor.b},${Math.min(1, alpha * 0.5)})`;
+          ctx.lineWidth = 0.45; // thin but more visible
           // soft glow
-          ctx.shadowBlur = 6;
-          ctx.shadowColor = `rgba(${webColor.r},${webColor.g},${webColor.b},0.06)`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = `rgba(${webColor.r},${webColor.g},${webColor.b},0.12)`;
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(q.x, q.y);
